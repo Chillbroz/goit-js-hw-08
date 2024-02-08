@@ -81,7 +81,7 @@ galleryList.innerHTML = galleryItems;
 
 galleryList.addEventListener('click', onGalleryItemClick);
     
-let instance;
+let instance = null;
 
 function onGalleryItemClick(e) {
   e.preventDefault();
@@ -93,23 +93,31 @@ function onGalleryItemClick(e) {
   const largeImageURL = e.target.dataset.source;
   const largeImageAlt = e.target.alt;
 
-  instance = basicLightbox.create(`
-    <div class="modal">
-      <img class="largeImage" src="${largeImageURL}" alt="${largeImageAlt}" width="1112" height="640">
-    </div>`,
-    {
-      onShow: () => {
-        document.addEventListener("keydown", closeModal);
-      },
-      onClose: () => {
-        document.removeEventListener("keydown", closeModal);
-      },
-    }
-  );
+  if (!instance) {
+    instance = basicLightbox.create(`
+      <div class="modal">
+        <img class="largeImage" src="${largeImageURL}" alt="${largeImageAlt}" width="1112" height="640">
+      </div>`,
+      {
+        onShow: () => {
+          document.addEventListener("keydown", onCloseModal);
+        },
+        onClose: () => {
+          document.removeEventListener("keydown", onCloseModal);
+        },
+      }
+    );
+  } else {
+      const modalContent = document.querySelector('.modal .largeImage');
+      modalContent.src = largeImageURL;
+      modalContent.alt = largeImageAlt;
+  }
 
   instance.show();
 }
 
-function closeModal() {
-  instance.close();
+function onCloseModal(e) {
+  if (e.key === 'Escape') {
+    instance.close();
+  }
 }
